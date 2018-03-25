@@ -11,6 +11,7 @@ import org.jsoup.select.Elements;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -29,34 +30,32 @@ public class ImageCrawler {
 
     private static List<String> imageUrlList = new ArrayList<String>(100000);
 
-    public static void main(String[] args) throws Exception {
-        System.out.println(sft.format(new Date()));
-//        String htmlUrl = "https://www.9001df.com/pic/4/2018-03-21/24015.html";
-//        imageExcute(htmlUrl);
-//        picExecute("https://www.9001df.com/pic/4/index.html");
-        Map<String, String> indexMap = indexExecute("https://www.9001df.com/pic/4/index.html");
-        for (String key : indexMap.keySet()) {
-            String picUrl = baseUri + key;
-            Map<String, String> picMap = picExecute(picUrl);
-            for (String key2 : picMap.keySet()) {
-                String htmlUrl = baseUri + key2;
+    public static void main(String[] args) {
+        try {
+            System.out.println(sft.format(new Date()));
+            Map<String, String> indexMap = indexExecute("https://www.9001df.com/pic/4/index.html");
+            for (String key : indexMap.keySet()) {
+                String picUrl = baseUri + key;
+                Map<String, String> picMap = picExecute(picUrl);
+                for (String key2 : picMap.keySet()) {
+                    String htmlUrl = baseUri + key2;
 //                String htmlName = picMap.get(key2);
-                System.out.println(htmlUrl);
-                imageExcute(htmlUrl);
-                Thread.sleep((int)(Math.random() * 100) * 10);
+                    System.out.println(htmlUrl);
+                    imageExcute(htmlUrl);
+                    Thread.sleep((int) (Math.random() * 10) * 1000);
+                }
             }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        } finally {
+            System.out.println(sft.format(new Date()));
+
+            imageUrlList.add("图片数：" + imageUrlList.size());
+            WriteStringToFile5(imageUrlList, filePath);
+
+            System.out.println(sft.format(new Date()));
         }
-//        imageExcute(htmlUrl);
-
-//        picExecute(htmlUrl);
-
-
-
-        System.out.println(sft.format(new Date()));
-        imageUrlList.add("图片数：" + imageUrlList.size());
-        WriteStringToFile5(imageUrlList, filePath);
-
-        System.out.println(sft.format(new Date()));
     }
 
     /**
@@ -212,7 +211,13 @@ public class ImageCrawler {
         //new一个URL对象
         URL url = new URL(imageUrl);
         //打开链接
-        HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
+        String protocol = imageUrl.substring(0 , imageUrl.indexOf(":"));
+        HttpURLConnection conn ;
+        if (protocol.equalsIgnoreCase("https")) {
+            conn = (HttpsURLConnection) url.openConnection();
+        } else {
+            conn = (HttpURLConnection) url.openConnection();
+        }
         //设置请求方式为"GET"
         conn.setRequestMethod("GET");
         //超时响应时间为5秒
