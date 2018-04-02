@@ -5,9 +5,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 爬虫第一弹
@@ -16,9 +21,14 @@ public class ImageCrawler {
     private static final String basePath = "/home/xiaoyu/sexy/";
     private static final String filePath = "/home/xiaoyu/url.txt";
     private static final String baseUri = "https://www.9001df.com";
-    private static int picNumber = 0;
+    private static AtomicInteger picNumber = new AtomicInteger(1);
+    private static AtomicInteger folderNumber = new AtomicInteger(1);
     private static SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static List<String> imageUrlList = new ArrayList<String>(100000);
+
+    private static ThreadPoolExecutor executor = new ThreadPoolExecutor(100, 1000, 10, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<Runnable>(10000),
+            new ThreadPoolExecutor.DiscardPolicy());
 
     public static void main(String[] args) {
         try {
@@ -26,13 +36,24 @@ public class ImageCrawler {
             Map<String, String> indexMap = indexExecute("https://www.9001df.com/pic/4/index.html");
             for (String key : indexMap.keySet()) {
                 String picUrl = baseUri + key;
-                Map<String, String> picMap = picExecute(picUrl);
-                for (String key2 : picMap.keySet()) {
-                    String htmlUrl = baseUri + key2;
+                final Map<String, String> picMap = picExecute(picUrl);
+                Thread.sleep((int) (Math.random() * 1) * 1000);
+                for (final String key2 : picMap.keySet()) {
+                    final String htmlUrl = baseUri + key2;
 //                String htmlName = picMap.get(key2);
                     System.out.println(htmlUrl);
-                    imageExecute(htmlUrl, picMap.get(key2));
-                    Thread.sleep((int) (Math.random() * 10) * 1000);
+
+//                    imageExecute(htmlUrl, picMap.get(key2));
+
+                    executor.execute(new Runnable() {
+                        public void run() {
+                            try {
+                                imageExecute(htmlUrl, picMap.get(key2));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 }
             }
 
@@ -47,7 +68,6 @@ public class ImageCrawler {
             System.out.println(sft.format(new Date()));
         }
     }
-
     /**
      * 第一层：/pic/4/index_185.html 第 185 頁
      *
@@ -132,8 +152,8 @@ public class ImageCrawler {
                 System.out.println("**********" + imageUrl);
                 imageUrl = element.getElementsByTag("img").attr("src");
                 if (imageUrl != null && imageUrl.length() > 0) {
-                    URL2ImageService.saveURL2Image(imageUrl, basePath  + picName +  picNumber + imageName);
-                    picNumber++;
+                    URL2ImageService.saveURL2Image(imageUrl, folderPath() +  picNumber + picName + imageName);
+                    picNumber.incrementAndGet();
                 }
             }
         } catch (IOException e) {
@@ -141,5 +161,23 @@ public class ImageCrawler {
         }
     }
 
-
+    private static String folderPath() throws IOException {
+        String folderPath = basePath + folderNumber;
+        if (picNumber.get() % 1000 == 0) {
+            folderNumber.getAndIncrement();
+            folderPath = basePath + folderNumber;
+            File file = new File(folderPath);
+            if (!file.exists()) {
+                if (!file.mkdir()) {
+                    throw new IOException("创建文件夹失败");
+                }
+            }
+        }
+        return folderPath + "/";
+    }
+/*
+    public static void main(String[] args) throws IOException {
+        picNumber = new AtomicInteger(1001);
+        System.out.println(folderPath());
+    }*/
 }
