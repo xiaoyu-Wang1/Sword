@@ -152,7 +152,7 @@ public class ImageCrawler {
                 System.out.println("**********" + imageUrl);
                 imageUrl = element.getElementsByTag("img").attr("src");
                 if (imageUrl != null && imageUrl.length() > 0) {
-                    URL2ImageService.saveURL2Image(imageUrl, folderPath() +  picNumber + picName + imageName);
+                    URL2ImageService.saveURL2Image(imageUrl, folderPath() + picName +  picNumber + imageName);
                     picNumber.incrementAndGet();
                 }
             }
