@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ImageCrawler {
     private static final String basePath = "/home/xiaoyu/sexy/";
     private static final String filePath = "/home/xiaoyu/url.txt";
-    private static final String baseUri = "https://www.9001df.com";
+    private static final String baseUri = "";
     private static AtomicInteger picNumber = new AtomicInteger(1);
     private static AtomicInteger folderNumber = new AtomicInteger(1);
     private static SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -33,7 +33,7 @@ public class ImageCrawler {
     public static void main(String[] args) {
         try {
             System.out.println(sft.format(new Date()));
-            Map<String, String> indexMap = indexExecute("https://www.9001df.com/pic/4/index.html");
+            Map<String, String> indexMap = indexExecute("");
             for (String key : indexMap.keySet()) {
                 String picUrl = baseUri + key;
                 final Map<String, String> picMap = picExecute(picUrl);
