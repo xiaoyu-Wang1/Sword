@@ -1,9 +1,11 @@
-package action;
+package service;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import utils.IOUtils;
+import utils.URL2ImageService;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,9 +20,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 爬虫第一弹
  */
 public class ImageCrawler {
-    private static final String basePath = "/home/xiaoyu/sexy/";
+    private static final String basePath = "/home/xiaoyu/sexy20190107/";
     private static final String filePath = "/home/xiaoyu/url.txt";
-    private static final String baseUri = "";
+    private static final String baseUri = "https://www.2234na.com";
+    private static final String subBaseUri = baseUri + "/pic/4/";
     private static AtomicInteger picNumber = new AtomicInteger(1);
     private static AtomicInteger folderNumber = new AtomicInteger(1);
     private static SimpleDateFormat sft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -33,17 +36,14 @@ public class ImageCrawler {
     public static void main(String[] args) {
         try {
             System.out.println(sft.format(new Date()));
-            Map<String, String> indexMap = indexExecute("");
+            Map<String, String> indexMap = indexExecute(subBaseUri);
             for (String key : indexMap.keySet()) {
                 String picUrl = baseUri + key;
                 final Map<String, String> picMap = picExecute(picUrl);
-                Thread.sleep((int) (Math.random() * 1) * 1000);
                 for (final String key2 : picMap.keySet()) {
                     final String htmlUrl = baseUri + key2;
 //                String htmlName = picMap.get(key2);
                     System.out.println(htmlUrl);
-
-//                    imageExecute(htmlUrl, picMap.get(key2));
 
                     executor.execute(new Runnable() {
                         public void run() {
@@ -58,7 +58,7 @@ public class ImageCrawler {
             }
 
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         } finally {
             System.out.println(sft.format(new Date()));
 
@@ -68,6 +68,7 @@ public class ImageCrawler {
             System.out.println(sft.format(new Date()));
         }
     }
+
     /**
      * 第一层：/pic/4/index_185.html 第 185 頁
      *
@@ -118,7 +119,7 @@ public class ImageCrawler {
             // 获取 "href"
             String picUrl = "";
             String picName = "";
-//            System.out.println(content.select("li"));
+            System.out.println(content.select("li"));
             for (Element element : content.select("li")) {
                 picUrl = element.getElementsByTag("a").attr("href");
                 picName = element.getElementsByTag("a").text().substring(19);
@@ -131,6 +132,11 @@ public class ImageCrawler {
         }
         return picUrlMap;
     }
+
+    /*public static void main(String[] args) throws Exception {
+        String htmlUrl = "https://www.6244df.com/pic/4/index_2.html";
+        picExecute(htmlUrl);
+    }*/
 
     /**
      * 第三级：image 级别
@@ -152,7 +158,7 @@ public class ImageCrawler {
                 System.out.println("**********" + imageUrl);
                 imageUrl = element.getElementsByTag("img").attr("src");
                 if (imageUrl != null && imageUrl.length() > 0) {
-                    URL2ImageService.saveURL2Image(imageUrl, folderPath() + picName +  picNumber + imageName);
+                    URL2ImageService.saveURL2Image(imageUrl, folderPath() + picName + picNumber + imageName);
                     picNumber.incrementAndGet();
                 }
             }
