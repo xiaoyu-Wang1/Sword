@@ -9,6 +9,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class URL2ImageService {
+    private static final String imageFolderPath = "/home/xiaoyu/sexy/";
+
     public static void saveURL2Image(String imageUrl, String imageName) throws Exception {
         //new一个URL对象
         URL url = new URL(imageUrl);
@@ -29,7 +31,7 @@ public class URL2ImageService {
         //得到图片的二进制数据，以二进制封装得到数据，具有通用性
         byte[] data = readInputStream(inStream);
         //new一个文件对象用来保存图片，默认保存当前工程根目录
-        File imageFile = new File(imageName);
+        File imageFile = new File(imageFolderPath + imageName);
         //创建输出流
         FileOutputStream outStream = new FileOutputStream(imageFile);
         //写入数据

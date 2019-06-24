@@ -38,6 +38,15 @@
             <artifactId>jsoup</artifactId>
             <version>1.11.2</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>3.141.59</version>
+        </dependency>
+
+
         <!-- 添加Spring依赖 -->
         <dependency>
             <groupId>org.springframework</groupId>

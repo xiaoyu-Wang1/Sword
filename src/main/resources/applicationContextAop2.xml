@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+    <!-- We don't need to this; This is required only in annotation based AOP support -->
+    <!-- <aop:aspectj-autoproxy /> -->
+
+    <aop:config>
+
+        <!-- Spring AOP Pointcut definitions -->
+        <aop:pointcut id="loggingOperation"
+                      expression="execution(* aop2.EmployeeManager.*(..))"/>
+
+        <aop:pointcut id="transactionOperation"
+                      expression="execution(* aop2.EmployeeManager.getEmployeeById(..))"/>
+
+        <!-- Spring AOP aspect 1 -->
+        <aop:aspect id="loggingAspect" ref="loggingAspectBean">
+
+            <!-- Spring AOP advises -->
+            <aop:before pointcut-ref="loggingOperation" method="logBefore"/>
+            <aop:after pointcut-ref="loggingOperation" method="logAfter"/>
+
+        </aop:aspect>
+
+        <!-- Spring AOP aspect 2 -->
+        <aop:aspect id="transactionAspect" ref="transactionAspectBean">
+            <aop:before pointcut-ref="transactionOperation" method="getEmployeeById"/>
+        </aop:aspect>
+
+    </aop:config>
+
+    <!-- Spring AOP aspect instances -->
+    <bean id="loggingAspectBean" class="aop2.EmployeeCRUDLoggingAspect"/>
+    <bean id="transactionAspectBean" class="aop2.EmployeeCRUDTransactionAspect"/>
+
+    <!-- Target Object -->
+    <bean id="employeeManager" class="aop2.EmployeeManagerImpl"/>
+
+</beans>
