@@ -14,11 +14,11 @@ http://www.springframework.org/schema/tx http://www.springframework.org/schema/t
         <property name="locations" value="classpath:jdbc.properties"/>
     </bean>-->
 
+    <aop:aspectj-autoproxy />
+
     <!-- 2.扫描的包路径，这里不扫描被@Controller注解的类 --><!--使用<context:component-scan/> 可以不在配置<context:annotation-config/> -->
     <context:component-scan base-package="service"/>
     <context:component-scan base-package="aop"/>
-
-    <aop:aspectj-autoproxy />
 
     <!--<import resource="classpath:spring-mybatis.xml"/>-->
 
