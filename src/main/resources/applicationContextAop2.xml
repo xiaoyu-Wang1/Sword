@@ -9,17 +9,10 @@
     <!-- <aop:aspectj-autoproxy /> -->
 
     <aop:config>
-
-        <!-- Spring AOP Pointcut definitions -->
-        <aop:pointcut id="loggingOperation"
-                      expression="execution(* aop2.EmployeeManager.*(..))"/>
-
-        <aop:pointcut id="transactionOperation"
-                      expression="execution(* aop2.EmployeeManager.getEmployeeById(..))"/>
-
         <!-- Spring AOP aspect 1 -->
         <aop:aspect id="loggingAspect" ref="loggingAspectBean">
-
+            <!-- Spring AOP Pointcut definitions -->
+            <aop:pointcut id="loggingOperation" expression="execution(* aop2.EmployeeManager.*(..))"/>
             <!-- Spring AOP advises -->
             <aop:before pointcut-ref="loggingOperation" method="logBefore"/>
             <aop:after pointcut-ref="loggingOperation" method="logAfter"/>
@@ -28,6 +21,7 @@
 
         <!-- Spring AOP aspect 2 -->
         <aop:aspect id="transactionAspect" ref="transactionAspectBean">
+            <aop:pointcut id="transactionOperation" expression="execution(* aop2.EmployeeManager.getEmployeeById(..))"/>
             <aop:before pointcut-ref="transactionOperation" method="getEmployeeById"/>
         </aop:aspect>
 
