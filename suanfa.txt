@@ -1,0 +1,194 @@
+package leetcode.tu;
+
+import javafx.util.Pair;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Set;
+
+/**
+ * 最小生成树算法
+ *
+ * @author w00564542
+ * @since 2021/6/10 15:34
+ */
+public class MinTree {
+
+    static class Vertex {
+        String name;
+        /**
+         * 邻接顶点list ， <v到w的权值， w点>
+         */
+        List<Pair<Integer, Vertex>> adj;
+
+        /**
+         * 跟相邻顶点所在边的权值
+         */
+        int dist;
+
+        Vertex path;
+
+        public Vertex(String name, List<Pair<Integer, Vertex>> adj, int dist, Vertex path) {
+            this.name = name;
+            this.adj = adj;
+            this.dist = dist;
+            this.path = path;
+        }
+
+        public void addAdj(List<Pair<Integer, Vertex>> vertexList) {
+            adj.addAll(vertexList);
+        }
+    }
+
+    /**
+     * 最小生成树算法 Prim 算法
+     *
+     * @param vertexSet 所有节点的集合
+     * @param s         起始点（任意一个点）
+     */
+    static void prim(Set<Vertex> vertexSet, Vertex s) {
+        // 在二叉树上的节点
+        Set<Vertex> treeVertexes = new HashSet<>();
+        // 不在二叉树上的节点
+        Set<Vertex> leftVertexes = new HashSet<>(vertexSet);
+        // 触发节点
+        treeVertexes.add(s);
+        leftVertexes.remove(s);
+
+        // 不在二叉树上的节点不为空
+        while (!leftVertexes.isEmpty()) {
+            int minWeight = Integer.MAX_VALUE;
+            Vertex vTemp = null;
+            Vertex wTemp = null;
+            // 1、遍历二叉树上已有节点u，找到w属于 leftVertexes 且权值最小
+            for (Vertex v : treeVertexes) {
+                for (Pair<Integer, Vertex> pair : v.adj) {
+                    Vertex w = pair.getValue();
+                    Integer weight = pair.getKey();
+                    if (leftVertexes.contains(w) && weight < minWeight) {
+                        vTemp = v;
+                        wTemp = w;
+                        minWeight = weight;
+                    }
+                }
+            }
+            wTemp.path = vTemp;
+            wTemp.dist = minWeight;
+
+            // 维护集合
+            treeVertexes.add(wTemp);
+            leftVertexes.remove(wTemp);
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class Edge {
+        /**
+         * v 到 w 的边的权值
+         */
+        int weight;
+        Vertex v;
+        Vertex w;
+    }
+
+    /**
+     * 最小生成树算法 Kruskal 算法
+     *
+     * @param edges       所有边的集合
+     * @param numVertices 顶点的个数
+     */
+    static void Kruskal(List<Edge> edges, int numVertices) {
+        // 1、按照边的权值大小排序
+        PriorityQueue<Edge> pq = new PriorityQueue<>(Comparator.comparing(Edge::getWeight));
+        pq.addAll(edges);
+        // 2、判断加入一条边，看是否成圈，是则丢弃，否则加入
+        Set<Vertex> treeVertexes = new HashSet<>();
+        while (treeVertexes.size() < numVertices) {
+            Edge edge = pq.poll();
+            // 边的两个顶点不能同时在 treeVertexes 集合中
+            if (!(treeVertexes.contains(edge.v) && treeVertexes.contains(edge.w))) {
+                treeVertexes.add(edge.v);
+                treeVertexes.add(edge.w);
+                System.out.println(edge.v.name + " " + edge.w.name + " " + edge.weight);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Vertex v1 = new Vertex("v1", new ArrayList<>(), 0, null);
+        Vertex v2 = new Vertex("v2", new ArrayList<>(), 0, null);
+        Vertex v3 = new Vertex("v3", new ArrayList<>(), 0, null);
+        Vertex v4 = new Vertex("v4", new ArrayList<>(), 0, null);
+        Vertex v5 = new Vertex("v5", new ArrayList<>(), 0, null);
+        Vertex v6 = new Vertex("v6", new ArrayList<>(), 0, null);
+        Vertex v7 = new Vertex("v7", new ArrayList<>(), 0, null);
+
+        // 组装邻接关系
+        v3.addAdj(Arrays.asList(
+                new Pair<>(4, v1),
+                new Pair<>(2, v4),
+                new Pair<>(5, v6)));
+        v1.addAdj(Arrays.asList(
+                new Pair<>(2, v2),
+                new Pair<>(1, v4),
+                new Pair<>(4, v3)));
+        v2.addAdj(Arrays.asList(
+                new Pair<>(2, v1),
+                new Pair<>(3, v4),
+                new Pair<>(10, v5)));
+        v6.addAdj(Arrays.asList(
+                new Pair<>(5, v3),
+                new Pair<>(8, v4),
+                new Pair<>(1, v7)));
+        v4.addAdj(Arrays.asList(
+                new Pair<>(1, v1),
+                new Pair<>(3, v2),
+                new Pair<>(2, v3),
+                new Pair<>(7, v5),
+                new Pair<>(8, v6),
+                new Pair<>(4, v7)));
+        v5.addAdj(Arrays.asList(
+                new Pair<>(10, v2),
+                new Pair<>(7, v4),
+                new Pair<>(6, v7)
+        ));
+        v7.addAdj(Arrays.asList(
+                new Pair<>(4, v4),
+                new Pair<>(6, v5),
+                new Pair<>(1, v6)
+        ));
+
+        List<Vertex> vertexList = new ArrayList<>(Arrays.asList(v1, v2, v3, v4, v5, v6, v7));
+//        prim(new HashSet<>(vertexList), v1);
+//        printVertexList(new ArrayList<>(vertexList));
+
+        /***********Kruskal算法********************/
+        List<Edge> edges = Arrays.asList(
+                new Edge(1, v1, v4),
+                new Edge(1, v6, v7),
+                new Edge(2, v1, v2),
+                new Edge(2, v3, v4),
+                new Edge(3, v2, v4),
+                new Edge(4, v1, v3),
+                new Edge(4, v4, v7),
+                new Edge(5, v3, v6),
+                new Edge(6, v5, v7)
+        );
+        Kruskal(edges, 7);
+    }
+
+    private static void printVertexList(List<Vertex> vertexList) {
+        for (Vertex vertex : vertexList) {
+            String name = vertex.path == null ? "null" : vertex.path.name;
+            System.out.println(vertex.name + " " + vertex.dist + " " + name);
+        }
+    }
+}
